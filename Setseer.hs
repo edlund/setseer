@@ -4,11 +4,7 @@ module Setseer where
 import Codec.Picture
 import Data.Complex
 
-data Axis = Axis 
- { min' :: Double
- , max' :: Double
- }
- deriving (Eq, Show)
+import Glue
 
 data MandelbrotParams = MandelbrotParams
  { escapeRadius :: Double
@@ -21,12 +17,9 @@ data MandelbrotParams = MandelbrotParams
  }
  deriving (Eq, Show)
 
-type Complex' = Complex Double
-
-frI :: ((Integral a, Num b) => a -> b)
-frI = fromIntegral
-
-makeMandelbrotParams :: (Int, Int) -> MandelbrotParams
+makeMandelbrotParams
+  :: (Int, Int)
+  -> MandelbrotParams
 makeMandelbrotParams dims = MandelbrotParams
     2.0
     128
@@ -45,19 +38,37 @@ makeMandelbrotParams dims = MandelbrotParams
     imax :: Axis
     imax = Axis (-1.0) 1.0
 
-mandelbrotPixelRenderer :: MandelbrotParams -> Int -> Int -> PixelRGB8
-mandelbrotPixelRenderer params x y = makePixel esc (baseRGB params)
+mandelbrotSimplePixel
+  :: MandelbrotParams
+  -> Int
+  -> PixelRGB8
+  -> PixelRGB8
+mandelbrotSimplePixel params escN (PixelRGB8 r g b) = PixelRGB8
+    (truncate (frI r * esc))
+    (truncate (frI g * esc))
+    (truncate (frI b * esc))
   where
-    mandelbrotEsc :: MandelbrotParams -> Int -> Complex' -> Complex' -> Double
+    esc :: Double
+    esc = frI escN / frI (escapeIter params)
+
+mandelbrotPixelRenderer
+  :: MandelbrotParams
+  -> (MandelbrotParams -> Int -> PixelRGB8 -> PixelRGB8)
+  -> Int
+  -> Int
+  -> PixelRGB8
+mandelbrotPixelRenderer params pxl x y = pxl params escN (baseRGB params)
+  where
+    mandelbrotEsc
+      :: MandelbrotParams
+      -> Int
+      -> Complex'
+      -> Complex'
+      -> Int
     mandelbrotEsc params i c z | i < escI && realPart (abs z) < escR
                                = mandelbrotEsc params (i + 1) (c) (z ^ 2 + c)
                                | otherwise
-                               = frI (escI - i) / frI escI
-    makePixel :: Double -> PixelRGB8 -> PixelRGB8
-    makePixel e (PixelRGB8 r g b) = PixelRGB8
-        (truncate (frI r * e))
-        (truncate (frI g * e))
-        (truncate (frI b * e))
+                               = escI - i
     cX :: Double
     cX = frI x * reScale params + min' (re params)
     cY :: Double
@@ -68,15 +79,15 @@ mandelbrotPixelRenderer params x y = makePixel esc (baseRGB params)
     escR = escapeRadius params
     escI :: Int
     escI = escapeIter params
-    esc :: Double
-    esc = mandelbrotEsc params 0 c0 c0
+    escN :: Int
+    escN = mandelbrotEsc params 0 c0 c0
 
 main :: IO ()
 main = do
-    let w = 1920
-    let h = 1080
+    let w = 128
+    let h = 128
     let params = makeMandelbrotParams (w, h)
-    let renderer = (mandelbrotPixelRenderer params)
+    let renderer = (mandelbrotPixelRenderer params mandelbrotSimplePixel)
     
     putStrLn "generateImage ..."
     writePng "test.png" $ generateImage renderer w h
