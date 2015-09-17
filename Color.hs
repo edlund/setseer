@@ -98,7 +98,11 @@ convertRGB8ToPixelHSVd r g b
     v :: Double
     v = xM
 
-prop_RGB2HSV_HSV2RGB :: Word8 -> Word8 -> Word8 -> Bool
+prop_RGB2HSV_HSV2RGB
+  :: Word8
+  -> Word8
+  -> Word8
+  -> Bool
 prop_RGB2HSV_HSV2RGB r g b
     = (goBack (convertRGB8ToPixelHSVd r g b)) == (PixelRGB8 r g b)
   where

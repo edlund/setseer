@@ -4,6 +4,7 @@ module MandelbrotSet where
 import Codec.Picture
 import Data.Complex
 
+import Cli
 import Color
 import Glue
 
@@ -105,7 +106,7 @@ mandelbrotPixelRenderer params pxl x y
     escs = mandelbrotEsc params 0 c0 c0
 
 mandelbrot
-  :: [String]
+  :: [ArgPair]
   -> (Int -> Int -> PixelRGB8)
 mandelbrot args
     = undefined
