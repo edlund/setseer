@@ -20,27 +20,6 @@ data MandelbrotParams = MandelbrotParams
 
 type Escape = (Int, Complex')
 
-makeMandelbrotParams
-  :: (Int, Int)
-  -> MandelbrotParams
-makeMandelbrotParams dims
-    = MandelbrotParams
-        2.0
-        32
-        reax
-        imax
-        ((max' reax - min' reax) / frI w)
-        ((max' imax - min' imax) / frI h)
-  where
-    w :: Int
-    w = fst dims
-    h :: Int
-    h = snd dims
-    reax :: Axis
-    reax = Axis (-2.0) 1.0
-    imax :: Axis
-    imax = Axis (-1.5) 1.5
-
 mandelbrotMu
   :: MandelbrotParams
   -> Escape
@@ -105,10 +84,41 @@ mandelbrotPixelRenderer params pxl x y
     escs :: Escape
     escs = mandelbrotEsc params 0 c0 c0
 
+makeMandelbrotParams
+  :: [ArgPair]
+  -> (Int, Int)
+  -> MandelbrotParams
+makeMandelbrotParams args dims
+    = MandelbrotParams
+        (read (findArgValue "mandelbrot-escaperadius" args) :: Double)
+        (read (findArgValue "mandelbrot-escapeiter" args) :: Int)
+        reax
+        imax
+        ((max' reax - min' reax) / frI w)
+        ((max' imax - min' imax) / frI h)
+  where
+    w :: Int
+    w = fst dims
+    h :: Int
+    h = snd dims
+    reax :: Axis
+    reax = Axis
+      (read (findArgValue "mandelbrot-re-min" args) :: Double)
+      (read (findArgValue "mandelbrot-re-max" args) :: Double)
+    imax :: Axis
+    imax = Axis
+      (read (findArgValue "mandelbrot-im-min" args) :: Double)
+      (read (findArgValue "mandelbrot-im-max" args) :: Double)
+
 mandelbrot
   :: [ArgPair]
+  -> (Int, Int)
   -> (Int -> Int -> PixelRGB8)
-mandelbrot args
-    = undefined
+mandelbrot args dims
+    = (mandelbrotPixelRenderer params
+        (mandelbrotSimplePixel
+          ((read (findArgValue "mandelbrot-color-s" args) :: Double))
+          ((read (findArgValue "mandelbrot-color-v" args) :: Double))))
   where
-    x = 0
+    params :: MandelbrotParams
+    params = makeMandelbrotParams args dims

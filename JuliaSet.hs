@@ -10,8 +10,9 @@ import Glue
 
 julia
   :: [ArgPair]
+  -> (Int, Int)
   -> (Int -> Int -> PixelRGB8)
-julia args
+julia args dims
     = undefined
   where
     x = 0
