@@ -21,13 +21,14 @@ type Escape = (Int, Complex')
 makeMandelbrotParams
   :: (Int, Int)
   -> MandelbrotParams
-makeMandelbrotParams dims = MandelbrotParams
-    2.0
-    128
-    reax
-    imax
-    ((max' reax - min' reax) / frI w)
-    ((max' imax - min' imax) / frI h)
+makeMandelbrotParams dims
+    = MandelbrotParams
+        2.0
+        32
+        reax
+        imax
+        ((max' reax - min' reax) / frI w)
+        ((max' imax - min' imax) / frI h)
   where
     w :: Int
     w = fst dims
@@ -42,23 +43,25 @@ mandelbrotMu
   :: MandelbrotParams
   -> Escape
   -> Double
-mandelbrotMu params escs = (frI n + 1.0
-    - log (log (realPart (abs z))) / log 2)
+mandelbrotMu params escs
+    = (frI n + 1.0 - log (log a) / log 2)
   where
     n :: Int
     n = fst escs
     z :: Complex'
     z = snd escs
+    a :: Double
+    a = realPart (abs z)
 
-mandelbrotMuPixel
+mandelbrotSimplePixel
   :: Double
   -> Double
   -> MandelbrotParams
   -> Escape
   -> PixelRGB8
-mandelbrotMuPixel s v params escs
+mandelbrotSimplePixel s v params escs
     | fst escs < escapeIter params
-    = convertHSVtoPixelRGB8 h s v
+    = convertHSVdToPixelRGB8 h s v
     | otherwise
     = PixelRGB8 0 0 0
   where
@@ -73,7 +76,8 @@ mandelbrotPixelRenderer
   -> Int
   -> Int
   -> PixelRGB8
-mandelbrotPixelRenderer params pxl x y = pxl params escs
+mandelbrotPixelRenderer params pxl x y
+    = pxl params escs
   where
     mandelbrotEsc
       :: MandelbrotParams
@@ -98,3 +102,11 @@ mandelbrotPixelRenderer params pxl x y = pxl params escs
     escI = escapeIter params
     escs :: Escape
     escs = mandelbrotEsc params 0 c0 c0
+
+mandelbrot
+  :: [String]
+  -> (Int -> Int -> PixelRGB8)
+mandelbrot args
+    = undefined
+  where
+    x = 0
