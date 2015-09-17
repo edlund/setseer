@@ -4,6 +4,7 @@ module MandelbrotSet where
 import Codec.Picture
 import Data.Complex
 
+import Color
 import Glue
 
 data MandelbrotParams = MandelbrotParams
