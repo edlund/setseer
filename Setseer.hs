@@ -8,11 +8,13 @@ import System.IO
 import System.Environment
 
 import Cli
+import Color
+import Glue
 
 import JuliaSet
 import MandelbrotSet
 
-mods :: [(String, ([ArgPair] -> (Int, Int) -> (Int -> Int -> PixelRGB8)))]
+mods :: [(String, ([ArgPair] -> SetParams -> (Int -> Int -> PixelRGB8)))]
 mods =
  [ ("mandelbrot", mandelbrot)
  , ("julia", julia)
@@ -23,15 +25,45 @@ defaultArgs =
  [ ("width", "1280")
  , ("height", "1024")
  , ("path", "setseer.png")
- , ("mandelbrot-re-min", "-2.0")
- , ("mandelbrot-re-max", "1.0")
- , ("mandelbrot-im-min", "-1.5")
- , ("mandelbrot-im-max", "1.5")
- , ("mandelbrot-escapeiter", "512")
- , ("mandelbrot-escaperadius", "2")
- , ("mandelbrot-color-s", "0.7")
- , ("mandelbrot-color-v", "1.0")
+ , ("color-stretch-r", "1.0")
+ , ("color-stretch-g", "1.0")
+ , ("color-stretch-b", "1.0")
+ , ("re-min", "-2.0")
+ , ("re-max", "1.0")
+ , ("im-min", "-1.5")
+ , ("im-max", "1.5")
+ , ("escapeiter", "512")
  ]
+
+makeSetParams
+  :: [ArgPair]
+  -> (Int, Int)
+  -> SetParams
+makeSetParams args dims
+    = SetParams
+        (read (findArgValue "escapeiter" args) :: Int)
+        reax
+        imax
+        ((max' reax - min' reax) / frI w)
+        ((max' imax - min' imax) / frI h)
+        (generateEscapeColors
+          0
+          (read (findArgValue "color-stretch-r" args) :: Double)
+          (read (findArgValue "color-stretch-g" args) :: Double)
+          (read (findArgValue "color-stretch-b" args) :: Double))
+  where
+    w :: Int
+    w = fst dims
+    h :: Int
+    h = snd dims
+    reax :: Axis
+    reax = Axis
+      (read (findArgValue "re-min" args) :: Double)
+      (read (findArgValue "re-max" args) :: Double)
+    imax :: Axis
+    imax = Axis
+      (read (findArgValue "im-min" args) :: Double)
+      (read (findArgValue "im-max" args) :: Double)
 
 main :: IO ()
 main = do
@@ -44,25 +76,15 @@ main = do
       
       let args = updateArgs (parseArgs rargs) defaultArgs
       
-      let w = read (findArgValue "width" args) :: Int
-      let h = read (findArgValue "height" args) :: Int
+      let width = read (findArgValue "width" args) :: Int
+      let height = read (findArgValue "height" args) :: Int
       
-      let renderer = creator args (w, h)
+      let params = makeSetParams args (width, height)
+      let renderer = creator args params
       
-      putStr "starting generation..."
-      writePng (findArgValue "path" args) $ generateImage renderer w h
-      putStrLn " done!"
+      putStrLn "starting generation..."
+      writePng (findArgValue "path" args)
+        $ generateImage renderer width height
+      putStrLn "... done!"
     else do
       putStrLn (progname ++ " mod [--mod-args] [--main-args]")
-
-{-
-let w = 256
-let h = 256
-let params = makeMandelbrotParams (w, h)
-let pixel = (mandelbrotMuPixel 0.7 1.0)
-let renderer = (mandelbrotPixelRenderer params pixel)
-
-putStrLn "generateImage ..."
-writePng "test.png" $ generateImage renderer w h
-putStrLn "... done."
--}

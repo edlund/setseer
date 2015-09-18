@@ -53,7 +53,7 @@ parseArgs
 parseArgs []
     = []
 parseArgs (arg:args)
-    = [transform matches] ++ parseArgs args
+    = transform matches : parseArgs args
   where
     transform
       :: ArgMatch

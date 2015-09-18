@@ -10,9 +10,7 @@ import Glue
 
 julia
   :: [ArgPair]
-  -> (Int, Int)
+  -> SetParams
   -> (Int -> Int -> PixelRGB8)
-julia args dims
+julia args params
     = undefined
-  where
-    x = 0
