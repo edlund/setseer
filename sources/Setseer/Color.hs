@@ -45,7 +45,7 @@ convertHSVdToPixelRGB8 h s v
     | i == 5
     = makePixel v p q
     | otherwise
-    = error ("convertHSVdToPixelRGB8: invalid i: " Data.List.++ show i)
+    = error $ "convertHSVdToPixelRGB8: invalid i: " Data.List.++ show i
   where
     makePixel
       :: Double
@@ -152,11 +152,11 @@ generateEscapeColors rStretch gStretch bStretch
         x :: Double
         x = (frI n * 2.0) / 256.0
         r :: Int
-        r = truncate (rs * (1.0 + cos ((x - 1.0) * pi)))
+        r = truncate $ rs * (1.0 + cos ((x - 1.0) * pi))
         g :: Int
-        g = truncate (gs * (1.0 + cos ((x - 1.0) * pi)))
+        g = truncate $ gs * (1.0 + cos ((x - 1.0) * pi))
         b :: Int
-        b = truncate (bs * (1.0 + sin ((x - 1.0) * pi)))
+        b = truncate $ bs * (1.0 + sin ((x - 1.0) * pi))
         r' :: Word8
         r' = frI $ min r 255
         g' :: Word8

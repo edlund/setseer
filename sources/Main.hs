@@ -8,10 +8,6 @@ Stability   : experimental
 Portability : POSIX
 -}
 
--- To profile:
--- ghc -prof -fprof-auto -rtsopts Main.hs
--- ghc -prof -fprof-auto -rtsopts -fexcess-precision -fforce-recomp Main.hs
-
 module Main where
 
 import Codec.Picture
