@@ -16,18 +16,11 @@ cabal-version:       >=1.8
 executable setseer
     main-is:           Main.hs
     hs-source-dirs:    sources/
---    other-modules:
---        sources/Cli.hs,
---        sources/Setseer/Color.hs,
---        sources/Setseer/Glue.hs,
---        sources/Setseer/Pixel.hs,
---        sources/Setseer/JuliaSet.hs,
---        sources/Setseer/MandelbrotSet.hs
     build-depends:
-        base ==4.6.*,
-        containers ==0.5.*,
-        vector ==0.10.*,
-        regex-posix ==0.95.*,
-        JuicyPixels ==3.2.*,
-        QuickCheck ==2.6.*
+        base >=4.6 && < 5.0,
+        containers >=0.5 && < 1.0,
+        vector >=0.10 && < 1.0,
+        regex-posix >=0.95 && < 1.0,
+        JuicyPixels >=3.2 && < 4.0,
+        QuickCheck >=2.6 && < 3.0
 
