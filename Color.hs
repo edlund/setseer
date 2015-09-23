@@ -1,18 +1,29 @@
+{-|
+Module      : Color
+Description : Conversion and generation
+Copyright   : Erik Edlund
+License     : GPL-3
+Maintainer  : erik.edlund@32767.se
+Stability   : experimental
+Portability : POSIX
+-}
 
 module Color where
 
 import Codec.Picture
 import Data.Complex
 import Data.Fixed
+import Data.List
+import Data.Vector
 import Data.Word
 import Test.QuickCheck
 
 import Glue
 
 data PixelHSVd = PixelHSVd
- Double -- h
- Double -- s
- Double -- v
+ !Double -- h
+ !Double -- s
+ !Double -- v
  deriving (Eq, Ord, Show)
 
 convertHSVdToPixelRGB8
@@ -34,7 +45,7 @@ convertHSVdToPixelRGB8 h s v
     | i == 5
     = makePixel v p q
     | otherwise
-    = error ("convertHSVdToPixelRGB8: invalid i: " ++ show i)
+    = error ("convertHSVdToPixelRGB8: invalid i: " Data.List.++ show i)
   where
     makePixel
       :: Double
@@ -89,9 +100,9 @@ convertRGB8ToPixelHSVd r g b
     b' :: Double
     b' = frI b / 255.0
     xm :: Double
-    xm = foldl (min) 1 [r', g', b']
+    xm = Data.List.foldl (min) 1 [r', g', b']
     xM :: Double
-    xM = foldl (max) 0 [r', g', b']
+    xM = Data.List.foldl (max) 0 [r', g', b']
     dX :: Double
     dX = xM - xm
     h :: Double
@@ -116,62 +127,46 @@ prop_RGB2HSV_HSV2RGB r g b
         = convertHSVdToPixelRGB8 h s v
 
 generateEscapeColors
-  :: Int
+  :: Double
   -> Double
   -> Double
-  -> Double
-  -> [PixelRGB8]
-generateEscapeColors n rStretch gStretch bStretch
-    | n > 255
-    = []
-    | otherwise
-    = PixelRGB8 r' g' b' : (generateEscapeColors (n + 1)
-        rStretch
-        gStretch
-        bStretch)
+  -> Vector PixelRGB8
+generateEscapeColors rStretch gStretch bStretch
+    = fromList $ generate 0 rStretch gStretch bStretch
   where
+    generate
+      :: Int
+      -> Double
+      -> Double
+      -> Double
+      -> [PixelRGB8]
+    generate n rStretch gStretch bStretch
+        | n > 255
+        = []
+        | otherwise
+        = PixelRGB8 r' g' b' : (generate (n + 1)
+            rStretch
+            gStretch
+            bStretch)
+      where
+        x :: Double
+        x = (frI n * 2.0) / 256.0
+        r :: Int
+        r = truncate (rs * (1.0 + cos ((x - 1.0) * pi)))
+        g :: Int
+        g = truncate (gs * (1.0 + cos ((x - 1.0) * pi)))
+        b :: Int
+        b = truncate (bs * (1.0 + sin ((x - 1.0) * pi)))
+        r' :: Word8
+        r' = frI $ min r 255
+        g' :: Word8
+        g' = frI $ min g 255
+        b' :: Word8
+        b' = frI $ min b 255
     rs :: Double
     rs = rStretch * 127.5
     gs :: Double
     gs = gStretch * 127.5
     bs :: Double
     bs = bStretch * 127.5
-    x :: Double
-    x = (frI n * 2.0) / 256.0
-    r :: Int
-    r = truncate (rs * (1.0 + cos ((x - 1.0) * pi)))
-    g :: Int
-    g = truncate (gs * (1.0 + cos ((x - 1.0) * pi)))
-    b :: Int
-    b = truncate (bs * (1.0 + sin ((x - 1.0) * pi)))
-    r' :: Word8
-    r' = frI (min r 255)
-    g' :: Word8
-    g' = frI (min g 255)
-    b' :: Word8
-    b' = frI (min b 255)
 
-escapeColorPixel
-  :: SetParams
-  -> Escape
-  -> PixelRGB8
-escapeColorPixel params escs
-    | n < 256
-    = colors params !! n
-    | otherwise
-    = PixelRGB8 0 0 0
-  where
-    cX :: Double
-    cX = realPart (snd escs)
-    cY :: Double
-    cY = imagPart (snd escs)
-    sqr :: Double
-    sqr = (cX ^ 2) + (cY ^ 2)
-    adj :: Double
-    adj = if sqr > e ^ 2
-          then log ((log sqr) / 2.0) / log 2.0
-          else 0.0
-    a :: Int
-    a = (fst escs - truncate adj) * 255
-    n :: Int
-    n = truncate ((frI a) / (frI (escapeIter params)))

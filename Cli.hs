@@ -1,3 +1,12 @@
+{-|
+Module      : Cli
+Description : A simplistic command line interface
+Copyright   : Erik Edlund
+License     : GPL-3
+Maintainer  : erik.edlund@32767.se
+Stability   : experimental
+Portability : POSIX
+-}
 
 module Cli where
 
@@ -29,7 +38,7 @@ findArgPair name (arg:args)
     | name == argName arg
     = arg
     | Data.List.null args
-    = error ("lookupArgPair: could not find " ++ name)
+    = error $ "lookupArgPair: could not find " ++ name
     | otherwise
     = findArgPair name args
 
@@ -101,4 +110,5 @@ updateArgs augments defaults
               then Data.Sequence.update i (name, value) defs
               else requireUpdate (name, value) (i + 1) defs
             | otherwise
-            = error ("updateArgs: unknown argument: " ++ name)
+            = error $ "updateArgs: unknown argument: " ++ name
+
