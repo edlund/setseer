@@ -1,5 +1,5 @@
 {-|
-Module      : JuliaSet
+Module      : Setseer.JuliaSet
 Description : Glue for rendering the julia set
 Copyright   : Erik Edlund
 License     : GPL-3
@@ -8,15 +8,14 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module JuliaSet where
+module Setseer.JuliaSet where
 
 import Codec.Picture
 import Data.Complex
 
-import Cli
-import Color
-import Glue
-import Pixel
+import Setseer.Color
+import Setseer.Glue
+import Setseer.Pixel
 
 juliaCC
   :: SetParams
@@ -30,10 +29,9 @@ juliaCZ :: (SetParams -> Int -> Int -> Complex'')
 juliaCZ = coordToComplex''
 
 julia
-  :: [ArgPair]
-  -> SetParams
+  :: SetParams
   -> (Int -> Int -> PixelRGB8)
-julia args params
+julia params
     = (pixelRenderer
         params
         escape_ZZ_plus_C

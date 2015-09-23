@@ -21,14 +21,14 @@ import System.IO
 import System.Environment
 
 import Cli
-import Color
-import Glue
-import Pixel
+import Setseer.Color
+import Setseer.Glue
+import Setseer.Pixel
 
-import JuliaSet
-import MandelbrotSet
+import Setseer.JuliaSet
+import Setseer.MandelbrotSet
 
-mods :: [(String, ([ArgPair] -> SetParams -> (Int -> Int -> PixelRGB8)))]
+mods :: [(String, (SetParams -> (Int -> Int -> PixelRGB8)))]
 mods =
  [ ("mandelbrot", mandelbrot)
  , ("julia", julia)
@@ -83,24 +83,24 @@ main = do
     progname <- getProgName
     cmdline <- getArgs
     if length cmdline > 0
-    then do
-      let (mod:rargs) = cmdline
-      let (Just creator) = lookup mod mods
-      
-      let args = updateArgs (parseArgs rargs) defaultArgs
-      
-      let path = findArgValue "path" args
-      let width = read (findArgValue "width" args) :: Int
-      let height = read (findArgValue "height" args) :: Int
-      let dims = (width, height)
-      
-      let params = makeSetParams args dims
-      let renderer = creator args params
-      
-      putStrLn "placing pixels..."
-      writePng path $ generateImage renderer width height
-      
-      putStrLn $ "result written to " ++ path
-    else do
-      putStrLn $ progname ++ " mod [--mod-args=xs] [--main-args=ys]"
+      then do
+        let (mod:rargs) = cmdline
+        let (Just creator) = lookup mod mods
+        
+        let args = updateArgs (parseArgs rargs) defaultArgs
+        
+        let path = findArgValue "path" args
+        let width = read (findArgValue "width" args) :: Int
+        let height = read (findArgValue "height" args) :: Int
+        let dims = (width, height)
+        
+        let params = makeSetParams args dims
+        let renderer = creator params
+        
+        putStrLn "placing pixels..."
+        writePng path $ generateImage renderer width height
+        
+        putStrLn $ "result written to " ++ path
+      else do
+        putStrLn $ progname ++ " mod [--mod-args=xs] [--main-args=ys]"
 

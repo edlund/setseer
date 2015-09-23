@@ -1,5 +1,5 @@
 {-|
-Module      : Pixel
+Module      : Setseer.Pixel
 Description : Generate pixels
 Copyright   : Erik Edlund
 License     : GPL-3
@@ -8,15 +8,15 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Pixel where
+module Setseer.Pixel where
 
 import Codec.Picture
 import Data.Complex
 import Data.Vector
 import Data.Word
 
-import Color
-import Glue
+import Setseer.Color
+import Setseer.Glue
 
 escapeColorPixel
   :: SetParams

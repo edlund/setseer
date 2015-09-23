@@ -1,5 +1,5 @@
 {-|
-Module      : Color
+Module      : Setseer.Color
 Description : Conversion and generation
 Copyright   : Erik Edlund
 License     : GPL-3
@@ -8,7 +8,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Color where
+module Setseer.Color where
 
 import Codec.Picture
 import Data.Complex
@@ -18,7 +18,7 @@ import Data.Vector
 import Data.Word
 import Test.QuickCheck
 
-import Glue
+import Setseer.Glue
 
 data PixelHSVd = PixelHSVd
  !Double -- h

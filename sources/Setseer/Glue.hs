@@ -1,5 +1,5 @@
 {-|
-Module      : Glue
+Module      : Setseer.Glue
 Description : A few things to hold setseer together
 Copyright   : Erik Edlund
 License     : GPL-3
@@ -8,7 +8,7 @@ Stability   : experimental
 Portability : POSIX
 -}
 
-module Glue where
+module Setseer.Glue where
 
 import Codec.Picture
 import Data.Complex

@@ -12,11 +12,8 @@ module Check where
 
 import Test.QuickCheck
 
-import Glue
-import Color
-
-import JuliaSet
-import MandelbrotSet
+import Setseer.Glue
+import Setseer.Color
 
 check
   :: (Testable prop)

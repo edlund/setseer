@@ -1,0 +1,33 @@
+-- general:
+name:                setseer
+version:             0.1.0.0
+synopsis:            Explore the Mandelbrot or Julia set.
+-- description:         
+homepage:            https://bitbucket.org/erikedlund/setseer
+license:             GPL-3
+license-file:        LICENSE
+author:              Erik Edlund
+maintainer:          erik.edlund@32767.se
+-- copyright:           
+category:            Graphics
+build-type:          Simple
+cabal-version:       >=1.8
+
+executable setseer
+    main-is:           Main.hs
+    hs-source-dirs:    sources/
+--    other-modules:
+--        sources/Cli.hs,
+--        sources/Setseer/Color.hs,
+--        sources/Setseer/Glue.hs,
+--        sources/Setseer/Pixel.hs,
+--        sources/Setseer/JuliaSet.hs,
+--        sources/Setseer/MandelbrotSet.hs
+    build-depends:
+        base ==4.6.*,
+        containers ==0.5.*,
+        vector ==0.10.*,
+        regex-posix ==0.95.*,
+        JuicyPixels ==3.2.*,
+        QuickCheck ==2.6.*
+
