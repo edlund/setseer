@@ -21,9 +21,10 @@ import Setseer.JuliaSet
 import Setseer.MandelbrotSet
 
 data Options = Options
- { optWidth       :: Int
+ { optOutput      :: FilePath
+ , optWriter      :: String
+ , optWidth       :: Int
  , optHeight      :: Int
- , optOutput      :: FilePath
  , optStretchR    :: Double
  , optStretchG    :: Double
  , optStretchB    :: Double
@@ -43,9 +44,10 @@ data Options = Options
 defaultOptions :: Options
 defaultOptions
  = Options
- { optWidth       = 1280
+ { optOutput      = "setseer.png"
+ , optWriter      = "png"
+ , optWidth       = 1280
  , optHeight      = 1024
- , optOutput      = "setseer.png"
  , optStretchR    = 1.0
  , optStretchG    = 1.0
  , optStretchB    = 1.0
@@ -132,6 +134,7 @@ putOptions
 putOptions opts
     = printf fmt
       (show (optOutput opts))
+      (show (optWriter opts))
       (optWidth opts)
       (optHeight opts)
       (optStretchR opts)
@@ -147,18 +150,20 @@ putOptions opts
   where
     fmt :: String
     fmt = unlines
-      [ "\n<Config>\n"
-      , "Output:   \t%s"
-      , "Width:    \t%dpx"
-      , "Height:   \t%dpx"
-      , "StretchR: \t%f"
-      , "StretchG: \t%f"
-      , "StretchB: \t%f"
-      , "Re:       \t%f <= x <= %f"
-      , "Im:       \t%f <= y <= %f"
-      , "cX:       \t%f"
-      , "cY:       \t%f"
-      , "EscIter:  \t%d"
-      , "\n"
+      [ "Conf"
+      , "-"
+      , "Output:    %s"
+      , "Writer:    %s"
+      , "Width:     %dpx"
+      , "Height:    %dpx"
+      , "StretchR:  %f"
+      , "StretchG:  %f"
+      , "StretchB:  %f"
+      , "Re:        %f <= x <= %f"
+      , "Im:        %f <= y <= %f"
+      , "cX:        %f"
+      , "cY:        %f"
+      , "EscIter:   %d"
+      , "-"
       ]
 

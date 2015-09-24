@@ -58,12 +58,12 @@ requireCreator
   -> (SetParams -> (Int -> Int -> PixelRGB8))
 requireCreator (_, (modCreator:[]))
     = case lookup modCreator modCreators of
-        Nothing -> error $ "could not find module: " ++ modCreator
+        Nothing -> error $ "Could not find module: " ++ modCreator
         Just cr -> cr
 requireCreator (_, [])
-    = error $ "missing module"
+    = error $ "Missing module"
 requireCreator (_, unknowns)
-    = error $ "confused by: " ++ show unknowns
+    = error $ "Confused by: " ++ show unknowns
 
 main
   :: IO ()
@@ -85,5 +85,5 @@ main = do
     
     writePng path $ generateImage renderer width height
     
-    putStrLn $ "result written to " ++ path
+    putStrLn $ "Result written to " ++ show path
 
