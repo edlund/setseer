@@ -10,105 +10,115 @@ Portability : POSIX
 
 module Cli where
 
-import Data.Foldable
-import Data.List
-import Data.Sequence
-import Text.Regex.Posix
+import Codec.Picture
+import Data.Maybe
+import System.Console.GetOpt
 
-type ArgPair = (String, String)
-type ArgMatch = (String, String, String, [String])
+import Setseer.Glue
 
-argName
-  :: ArgPair
-  -> String
-argName (n, v)
-    = n
+import Setseer.JuliaSet
+import Setseer.MandelbrotSet
 
-argValue
-  :: ArgPair
-  -> String
-argValue (n, v)
-    = v
+data Options = Options
+ { optWidth       :: Int
+ , optHeight      :: Int
+ , optOutput      :: FilePath
+ , optStretchR    :: Double
+ , optStretchG    :: Double
+ , optStretchB    :: Double
+ , optReMin       :: Double
+ , optReMax       :: Double
+ , optImMin       :: Double
+ , optImMax       :: Double
+ , optCX          :: Double
+ , optCY          :: Double
+ , optEscapeIter  :: Int
+ }
+ deriving
+ ( Eq
+ , Show
+ )
 
-findArgPair
-  :: String
-  -> [ArgPair]
-  -> ArgPair
-findArgPair name (arg:args)
-    | name == argName arg
-    = arg
-    | Data.List.null args
-    = error $ "lookupArgPair: could not find " ++ name
+defaultOptions :: Options
+defaultOptions
+ = Options
+ { optWidth       = 1280
+ , optHeight      = 1024
+ , optOutput      = "setseer.png"
+ , optStretchR    = 1.0
+ , optStretchG    = 1.0
+ , optStretchB    = 1.0
+ , optReMin       = -2.0
+ , optReMax       = 2.0
+ , optImMin       = -1.5
+ , optImMax       = 1.5
+ , optCX          = -0.75
+ , optCY          = -0.20
+ , optEscapeIter  = 64
+ }
+
+modCreators :: [(String, (SetParams -> (Int -> Int -> PixelRGB8)))]
+modCreators =
+ [ ("mandelbrot", mandelbrot)
+ , ("julia", julia)
+ ]
+
+optDescriptions :: [OptDescr (Options -> Options)]
+optDescriptions =
+ [ Option ['w'] ["width"] (ReqArg ((\ v opts
+       -> opts { optWidth = abs $ read v :: Int })) "Int")
+     "image width"
+ , Option ['h'] ["height"] (ReqArg ((\ v opts
+       -> opts { optHeight = abs $ read v :: Int })) "Int")
+     "image height"
+ , Option ['o'] ["output"] (ReqArg ((\ v opts
+       -> opts { optOutput = v })) "Path")
+     "image path"
+ 
+ , Option [] ["stretch-r"] (ReqArg ((\ v opts
+       -> opts { optStretchR = read v :: Double })) "Double")
+     "red stretch"
+ , Option [] ["stretch-g"] (ReqArg ((\ v opts
+       -> opts { optStretchG = read v :: Double })) "Double")
+     "green stretch"
+ , Option [] ["stretch-b"] (ReqArg ((\ v opts
+       -> opts { optStretchB = read v :: Double })) "Double")
+     "blue stretch"
+ 
+ , Option ['r'] ["remin"] (ReqArg ((\ v opts
+       -> opts { optReMin = read v :: Double })) "Double")
+     "real min"
+ , Option ['R'] ["remax"] (ReqArg ((\ v opts
+       -> opts { optReMax = read v :: Double })) "Double")
+     "real max"
+ , Option ['i'] ["immin"] (ReqArg ((\ v opts
+       -> opts { optImMin = read v :: Double })) "Double")
+     "imag min"
+ , Option ['I'] ["immax"] (ReqArg ((\ v opts
+       -> opts { optImMax = read v :: Double })) "Double")
+     "imag max"
+ 
+ , Option ['X'] ["cx"] (ReqArg ((\ v opts
+       -> opts { optCX = read v :: Double })) "Double")
+     "cX constant"
+ , Option ['Y'] ["cy"] (ReqArg ((\ v opts
+       -> opts { optCY = read v :: Double })) "Double")
+     "cY constant"
+ 
+ , Option ['n'] ["iter"] (ReqArg ((\ v opts
+       -> opts { optEscapeIter = read v :: Int })) "Int")
+     "escape iteration"
+ ]
+
+parseArgs :: [String] -> IO (Options, [String])
+parseArgs argv
+    | "--help" `elem` argv
+    = ioError $ userError $ usageInfo header optDescriptions
     | otherwise
-    = findArgPair name args
-
-findArgName
-  :: String
-  -> [ArgPair]
-  -> String
-findArgName name args
-    = argName (findArgPair name args)
-
-findArgValue
-  :: String
-  -> [ArgPair]
-  -> String
-findArgValue name args
-    = argValue (findArgPair name args)
-
-parseArgs
-  :: [String]
-  -> [ArgPair]
-parseArgs []
-    = []
-parseArgs (arg:args)
-    = transform matches : parseArgs args
+    = case getOpt Permute optDescriptions argv of
+        (opts, xs, []) -> return (foldl (flip id) defaultOptions opts, xs)
+        (_, _, errors) -> ioError (userError (concat errors
+            ++ usageInfo header optDescriptions))
   where
-    transform
-      :: ArgMatch
-      -> ArgPair
-    transform (left, full, _, matches)
-        = (name, value)
-      where
-        name :: String
-        name = if Data.List.null matches then "" else matches !! 0
-        value :: String
-        value = if Data.List.null matches then left else matches !! 2
-    pattern :: String
-    pattern = "^--([-a-zA-Z0-9]*)(=([-a-zA-Z0-9 ]+))?$"
-    matches :: ArgMatch
-    matches = arg =~ pattern :: ArgMatch
-
-updateArgs
-  :: [ArgPair]
-  -> [ArgPair]
-  -> [ArgPair]
-updateArgs [] defaults
-    = defaults
-updateArgs augments defaults
-    = toList (walk augments (fromList defaults))
-  where
-    walk
-      :: [ArgPair]
-      -> Seq ArgPair
-      -> Seq ArgPair
-    walk [] defaults
-        = defaults
-    walk (aug:augs) defaults
-        = walk augs $ requireUpdate aug 0 defaults
-      where
-        requireUpdate
-          :: ArgPair
-          -> Int
-          -> Seq ArgPair
-          -> Seq ArgPair
-        requireUpdate (name, value) i defs
-            | Data.List.null name
-            = defs
-            | i < Data.Sequence.length defs
-            = if argName (Data.Sequence.index defs i) == name
-              then Data.Sequence.update i (name, value) defs
-              else requireUpdate (name, value) (i + 1) defs
-            | otherwise
-            = error $ "updateArgs: unknown argument: " ++ name
-
+    header :: String
+    header = "Usage: setseer mandelbrot|julia [--options]"

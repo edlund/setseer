@@ -13,90 +13,74 @@ module Main where
 import Codec.Picture
 import Data.Complex
 import Data.List
-import System.IO
+import Data.Maybe
+import System.Console.GetOpt
 import System.Environment
+import System.IO
 
 import Cli
 import Setseer.Color
 import Setseer.Glue
 import Setseer.Pixel
 
-import Setseer.JuliaSet
-import Setseer.MandelbrotSet
-
-mods :: [(String, (SetParams -> (Int -> Int -> PixelRGB8)))]
-mods =
- [ ("mandelbrot", mandelbrot)
- , ("julia", julia)
- ]
-
-defaultArgs :: [ArgPair]
-defaultArgs =
- [ ("width", "1280")
- , ("height", "1024")
- , ("path", "setseer.png")
- , ("color-stretch-r", "1.0")
- , ("color-stretch-g", "1.0")
- , ("color-stretch-b", "1.0")
- , ("re-min", "-2.0")
- , ("re-max", "2.0")
- , ("im-min", "-1.5")
- , ("im-max", "1.5")
- , ("escapeiter", "64")
- , ("cx", "-0.75")
- , ("cy", "-0.20")
- ]
-
 makeSetParams
-  :: [ArgPair]
-  -> (Int, Int)
+  :: Options
   -> SetParams
-makeSetParams args (w, h)
+makeSetParams opts
     = SetParams
-        (read (findArgValue "escapeiter" args) :: Int)
+        (optEscapeIter opts)
         reax
         imax
         ((max' reax - min' reax) / frI w)
         ((max' imax - min' imax) / frI h)
-        (read (findArgValue "cx" args) :: Double)
-        (read (findArgValue "cy" args) :: Double)
+        (optCX opts)
+        (optCY opts)
         (generateEscapeColors
-          (read (findArgValue "color-stretch-r" args) :: Double)
-          (read (findArgValue "color-stretch-g" args) :: Double)
-          (read (findArgValue "color-stretch-b" args) :: Double))
+          (optStretchR opts)
+          (optStretchG opts)
+          (optStretchB opts))
   where
+    w :: Int
+    w = optWidth opts
+    h :: Int
+    h = optHeight opts
     reax :: Axis
     reax = Axis
-      (read (findArgValue "re-min" args) :: Double)
-      (read (findArgValue "re-max" args) :: Double)
+      (optReMin opts)
+      (optReMax opts)
     imax :: Axis
     imax = Axis
-      (read (findArgValue "im-min" args) :: Double)
-      (read (findArgValue "im-max" args) :: Double)
+      (optImMin opts)
+      (optImMax opts)
 
-main :: IO ()
+requireCreator
+  :: (Options, [String])
+  -> (SetParams -> (Int -> Int -> PixelRGB8))
+requireCreator (_, (modCreator:[]))
+    = case lookup modCreator modCreators of
+        Nothing -> error $ "could not find module: " ++ modCreator
+        Just cr -> cr
+requireCreator (_, unknowns)
+    = error $ "confused by: " ++ show unknowns
+
+main
+  :: IO ()
 main = do
-    progname <- getProgName
-    cmdline <- getArgs
-    if length cmdline > 0
-      then do
-        let (mod:rargs) = cmdline
-        let (Just creator) = lookup mod mods
-        
-        let args = updateArgs (parseArgs rargs) defaultArgs
-        
-        let path = findArgValue "path" args
-        let width = read (findArgValue "width" args) :: Int
-        let height = read (findArgValue "height" args) :: Int
-        let dims = (width, height)
-        
-        let params = makeSetParams args dims
-        let renderer = creator params
-        
-        putStrLn "placing pixels..."
-        writePng path $ generateImage renderer width height
-        
-        putStrLn $ "result written to " ++ path
-      else do
-        putStrLn $ progname ++ " mod [--mod-args=xs] [--main-args=ys]"
-
+    args <- getArgs
+    ropts <- parseArgs args
+    
+    let opts = fst ropts
+    
+    let width = optWidth opts
+    let height = optHeight opts
+    let path = optOutput opts
+    
+    let creator = requireCreator ropts
+    let params = makeSetParams opts
+    let renderer = creator params
+    
+    putStrLn "..."
+    
+    writePng path $ generateImage renderer width height
+    
+    putStrLn $ "result written to " ++ path

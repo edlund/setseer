@@ -22,7 +22,10 @@ data Axis = Axis
  { min' :: Double
  , max' :: Double
  }
- deriving (Eq, Show)
+ deriving
+ ( Eq
+ , Show
+ )
 
 data SetParams = SetParams
  { escapeIter   :: Int
@@ -34,7 +37,10 @@ data SetParams = SetParams
  , cy           :: Double
  , colors       :: Vector PixelRGB8
  }
- deriving (Eq, Show)
+ deriving
+ ( Eq
+ , Show
+ )
 
 frI :: ((Integral a, Num b) => a -> b)
 frI = fromIntegral
