@@ -13,6 +13,7 @@ module Cli where
 import Codec.Picture
 import Data.Maybe
 import System.Console.GetOpt
+import Text.Printf
 
 import Setseer.Glue
 
@@ -110,7 +111,9 @@ optDescriptions =
      "escape iteration"
  ]
 
-parseArgs :: [String] -> IO (Options, [String])
+parseArgs
+  :: [String]
+  -> IO (Options, [String])
 parseArgs argv
     | "--help" `elem` argv
     = ioError $ userError $ usageInfo header optDescriptions
@@ -122,3 +125,40 @@ parseArgs argv
   where
     header :: String
     header = "Usage: setseer mandelbrot|julia [--options]"
+
+putOptions
+  :: Options
+  -> IO ()
+putOptions opts
+    = printf fmt
+      (show (optOutput opts))
+      (optWidth opts)
+      (optHeight opts)
+      (optStretchR opts)
+      (optStretchG opts)
+      (optStretchB opts)
+      (optReMin opts)
+      (optReMax opts)
+      (optImMin opts)
+      (optImMax opts)
+      (optCX opts)
+      (optCY opts)
+      (optEscapeIter opts)
+  where
+    fmt :: String
+    fmt = unlines
+      [ "\n<Config>\n"
+      , "Output:   \t%s"
+      , "Width:    \t%dpx"
+      , "Height:   \t%dpx"
+      , "StretchR: \t%f"
+      , "StretchG: \t%f"
+      , "StretchB: \t%f"
+      , "Re:       \t%f <= x <= %f"
+      , "Im:       \t%f <= y <= %f"
+      , "cX:       \t%f"
+      , "cY:       \t%f"
+      , "EscIter:  \t%d"
+      , "\n"
+      ]
+

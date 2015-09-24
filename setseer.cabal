@@ -19,8 +19,8 @@ executable setseer
     build-depends:
         base >=4.6 && < 5.0,
         containers >=0.5 && < 1.0,
-        vector >=0.10 && < 1.0,
         regex-posix >=0.95 && < 1.0,
+        vector >=0.10 && < 1.0,
         JuicyPixels >=3.2 && < 4.0,
         QuickCheck >=2.6 && < 3.0
 

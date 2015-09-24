@@ -60,6 +60,8 @@ requireCreator (_, (modCreator:[]))
     = case lookup modCreator modCreators of
         Nothing -> error $ "could not find module: " ++ modCreator
         Just cr -> cr
+requireCreator (_, [])
+    = error $ "missing module"
 requireCreator (_, unknowns)
     = error $ "confused by: " ++ show unknowns
 
@@ -79,8 +81,9 @@ main = do
     let params = makeSetParams opts
     let renderer = creator params
     
-    putStrLn "..."
+    putOptions opts
     
     writePng path $ generateImage renderer width height
     
     putStrLn $ "result written to " ++ path
+
