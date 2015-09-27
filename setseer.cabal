@@ -17,10 +17,10 @@ executable setseer
     main-is:           Main.hs
     hs-source-dirs:    sources/
     build-depends:
-        base >=4.6 && < 5.0,
-        containers >=0.5 && < 1.0,
-        regex-posix >=0.95 && < 1.0,
-        vector >=0.10 && < 1.0,
-        JuicyPixels >=3.2 && < 4.0,
-        QuickCheck >=2.6 && < 3.0
+        base >=4.0 && < 5.0,
+        containers >=0.1 && < 1.0,
+        regex-posix >=0.10 && < 1.0,
+        vector >=0.1 && < 1.0,
+        JuicyPixels >=3.0 && < 4.0,
+        QuickCheck >=2.0 && < 3.0
 

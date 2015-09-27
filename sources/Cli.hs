@@ -21,43 +21,47 @@ import Setseer.JuliaSet
 import Setseer.MandelbrotSet
 
 data Options = Options
- { optOutput      :: FilePath
- , optWriter      :: String
- , optWidth       :: Int
- , optHeight      :: Int
- , optStretchR    :: Double
- , optStretchG    :: Double
- , optStretchB    :: Double
- , optReMin       :: Double
- , optReMax       :: Double
- , optImMin       :: Double
- , optImMax       :: Double
- , optCX          :: Double
- , optCY          :: Double
- , optEscapeIter  :: Int
+ { optInteractive  :: Bool
+ , optOutput       :: FilePath
+ , optWriter       :: String
+ , optWidth        :: Int
+ , optHeight       :: Int
+ , optStretchR     :: Double
+ , optStretchG     :: Double
+ , optStretchB     :: Double
+ , optReMin        :: Double
+ , optReMax        :: Double
+ , optImMin        :: Double
+ , optImMax        :: Double
+ , optCX           :: Double
+ , optCY           :: Double
+ , optEscapeIter   :: Int
  }
  deriving
  ( Eq
  , Show
  )
 
+type OptionsPair = (Options, [String])
+
 defaultOptions :: Options
 defaultOptions
  = Options
- { optOutput      = "setseer.png"
- , optWriter      = "png"
- , optWidth       = 1280
- , optHeight      = 1024
- , optStretchR    = 1.0
- , optStretchG    = 1.0
- , optStretchB    = 1.0
- , optReMin       = -2.0
- , optReMax       = 2.0
- , optImMin       = -1.5
- , optImMax       = 1.5
- , optCX          = -0.75
- , optCY          = -0.20
- , optEscapeIter  = 64
+ { optInteractive  = False
+ , optOutput       = "setseer.png"
+ , optWriter       = "png"
+ , optWidth        = 1280
+ , optHeight       = 1024
+ , optStretchR     = 1.0
+ , optStretchG     = 1.0
+ , optStretchB     = 1.0
+ , optReMin        = -2.0
+ , optReMax        = 2.0
+ , optImMin        = -1.5
+ , optImMax        = 1.5
+ , optCX           = -0.75
+ , optCY           = -0.20
+ , optEscapeIter   = 64
  }
 
 modCreators :: [(String, (SetParams -> (Int -> Int -> PixelRGB8)))]
@@ -68,15 +72,18 @@ modCreators =
 
 optDescriptions :: [OptDescr (Options -> Options)]
 optDescriptions =
- [ Option ['w'] ["width"] (ReqArg ((\ v opts
+ [ Option ['$'] ["interactive"] (NoArg ((\ opts
+       -> opts { optInteractive = False })))
+     "interactive mode"
+ , Option ['o'] ["output"] (ReqArg ((\ v opts
+       -> opts { optOutput = v })) "Path")
+     "image path"
+ , Option ['w'] ["width"] (ReqArg ((\ v opts
        -> opts { optWidth = abs $ read v :: Int })) "Int")
      "image width"
  , Option ['h'] ["height"] (ReqArg ((\ v opts
        -> opts { optHeight = abs $ read v :: Int })) "Int")
      "image height"
- , Option ['o'] ["output"] (ReqArg ((\ v opts
-       -> opts { optOutput = v })) "Path")
-     "image path"
  
  , Option [] ["stretch-r"] (ReqArg ((\ v opts
        -> opts { optStretchR = read v :: Double })) "Double")
@@ -115,15 +122,16 @@ optDescriptions =
 
 parseArgs
   :: [String]
-  -> IO (Options, [String])
-parseArgs argv
+  -> Options
+  -> IO OptionsPair
+parseArgs argv defaults
     | "--help" `elem` argv
     = ioError $ userError $ usageInfo header optDescriptions
     | otherwise
     = case getOpt Permute optDescriptions argv of
-        (opts, xs, []) -> return (foldl (flip id) defaultOptions opts, xs)
-        (_, _, errors) -> ioError (userError (concat errors
-            ++ usageInfo header optDescriptions))
+        (opts, xs, []) -> return (foldl (flip id) defaults opts, xs)
+        (_, _, errors) -> ioError $ userError $ concat errors
+            ++ usageInfo header optDescriptions
   where
     header :: String
     header = "Usage: setseer mandelbrot|julia [--options]"
