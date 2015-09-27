@@ -28,19 +28,13 @@ escapeColorPixel params escs
     | otherwise
     = PixelRGB8 0 0 0
   where
-    cX :: Double
     cX = realPart $ snd escs
-    cY :: Double
     cY = imagPart $ snd escs
-    sqr :: Double
     sqr = (cX * cX) + (cY * cY)
-    adj :: Double
     adj = if sqr > ee
           then log ((log sqr) / 2.0) / logFor2
           else 0.0
-    a :: Int
     a = (fst escs - truncate adj) * 255
-    n :: Int
     n = abs $ truncate $ (frI a) / (frI (escapeIter params))
 
 rainbowPixel
@@ -53,19 +47,12 @@ rainbowPixel params escs
     | otherwise
     = PixelRGB8 0 0 0
   where
-    s :: Double
     s = 0.7
-    v :: Double
     v = 1.0
-    n :: Int
     n = fst escs
-    z :: Complex'
     z = snd escs
-    a :: Double
     a = realPart $ abs z
-    m :: Double
     m = frI n + 1.0 - log (log a) / logFor2
-    h :: Double
     h = frI (escapeIter params - fst escs) / m
 
 -- Escape for `z^(2) + c`; handles Mandelbrot and Julia sets
@@ -82,11 +69,8 @@ escape_ZZ_plus_C params i (cX, cY) (zX, zY)
     | otherwise
     = (i, (zX :+ zY))
   where
-    m :: Double
     m = (zX * zX) + (zY * zY)
-    zX' :: Double
     zX' = zX * zX - zY * zY + cX
-    zY' :: Double
     zY' = 2.0 * zX * zY + cY
 
 -- Curry to taste.
@@ -102,10 +86,7 @@ pixelRenderer
 pixelRenderer params esc cC cZ pxl x y
     = pxl params escs
   where
-    c :: Complex''
     c = cC params x y
-    z :: Complex''
     z = cZ params x y
-    escs :: Escape
     escs = esc params 0 c z
 

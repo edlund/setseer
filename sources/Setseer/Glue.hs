@@ -68,8 +68,6 @@ coordToComplex''
 coordToComplex'' params x y
     = (cX, cY)
   where
-    cX :: Double
     cX = frI x * reScale params + min' (re params)
-    cY :: Double
     cY = frI y * imScale params + min' (im params)
 

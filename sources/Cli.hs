@@ -133,7 +133,6 @@ parseArgs argv defaults
         (_, _, errors) -> ioError $ userError $ concat errors
             ++ usageInfo header optDescriptions
   where
-    header :: String
     header = "Usage: setseer mandelbrot|julia [--options]"
 
 putOptions

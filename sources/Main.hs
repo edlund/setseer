@@ -41,15 +41,11 @@ makeSetParams opts
           (optStretchG opts)
           (optStretchB opts))
   where
-    w :: Int
     w = optWidth opts
-    h :: Int
     h = optHeight opts
-    reax :: Axis
     reax = Axis
       (optReMin opts)
       (optReMax opts)
-    imax :: Axis
     imax = Axis
       (optImMin opts)
       (optImMax opts)
